@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Tank Problem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #input {
+            width: 300px;
+            margin-bottom: 10px;
+        }
+
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        svg {
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Water Tank Problem</h1>
+    <input type="text" id="input" placeholder="Enter block heights (comma-separated)">
+    <button onclick="calculateWater()">Calculate</button>
+    <div id="result"></div>
+    <h2>Initial Container</h2>
+    <svg id="waterTank" width="800" height="200"></svg>
+    <h2>Water Levels Only</h2>
+    <svg id="waterLevels" width="800" height="200"></svg>
+
+    <script>
+        function calculateWater() {
+            const input = document.getElementById('input').value;
+            const heights = input.split(',').map(Number);
+            const water = computeWaterUnits(heights);
+            const result = document.getElementById('result');
+            result.textContent = `Water stored: ${water} Units`;
+            drawWaterTank(heights);
+            drawWaterLevels(heights);
+        }
+
+        function computeWaterUnits(heights) {
+            let left = 0;
+            let right = heights.length - 1;
+            let leftMax = 0;
+            let rightMax = 0;
+            let water = 0;
+
+            while (left < right) {
+                if (heights[left] < heights[right]) {
+                    if (heights[left] >= leftMax) {
+                        leftMax = heights[left];
+                    } else {
+                        water += leftMax - heights[left];
+                    }
+                    left++;
+                } else {
+                    if (heights[right] >= rightMax) {
+                        rightMax = heights[right];
+                    } else {
+                        water += rightMax - heights[right];
+                    }
+                    right--;
+                }
+            }
+
+            return water;
+        }
+
+        function drawWaterTank(heights) {
+            const svg = document.getElementById('waterTank');
+            svg.innerHTML = '';
+            const maxHeight = Math.max(...heights);
+            const width = 800;
+            const height = 200;
+            const blockWidth = width / heights.length;
+            const unitSize = height / (maxHeight + 1);
+
+            for (let i = 0; i <= maxHeight; i++) {
+                for (let j = 0; j < heights.length; j++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', j * blockWidth);
+                    rect.setAttribute('y', height - (i + 1) * unitSize);
+                    rect.setAttribute('width', blockWidth);
+                    rect.setAttribute('height', unitSize);
+                    rect.setAttribute('fill', 'none');
+                    rect.setAttribute('stroke', '#333');
+                    svg.appendChild(rect);
+                }
+            }
+
+            heights.forEach((h, i) => {
+                for (let j = 0; j < h; j++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', i * blockWidth);
+                    rect.setAttribute('y', height - (j + 1) * unitSize);
+                    rect.setAttribute('width', blockWidth);
+                    rect.setAttribute('height', unitSize);
+                    rect.setAttribute('stroke', '#333');
+                    svg.appendChild(rect);
+                }
+            });
+
+            let left = 0;
+            let right = heights.length - 1;
+            let leftMax = 0;
+            let rightMax = 0;
+
+            while (left < right) {
+                if (heights[left] < heights[right]) {
+                    if (heights[left] >= leftMax) {
+                        leftMax = heights[left];
+                    } else {
+                        for (let j = heights[left]; j < leftMax; j++) {
+                            const waterRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            waterRect.setAttribute('x', left * blockWidth);
+                            waterRect.setAttribute('y', height - (j + 1) * unitSize);
+                            waterRect.setAttribute('width', blockWidth);
+                            waterRect.setAttribute('height', unitSize);
+                            waterRect.setAttribute('fill', 'rgba(56, 189, 248, 0.5)');
+                            svg.appendChild(waterRect);
+                        }
+                    }
+                    left++;
+                } else {
+                    if (heights[right] >= rightMax) {
+                        rightMax = heights[right];
+                    } else {
+                        for (let j = heights[right]; j < rightMax; j++) {
+                            const waterRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            waterRect.setAttribute('x', right * blockWidth);
+                            waterRect.setAttribute('y', height - (j + 1) * unitSize);
+                            waterRect.setAttribute('width', blockWidth);
+                            waterRect.setAttribute('height', unitSize);
+                            waterRect.setAttribute('fill', 'rgba(56, 189, 248, 0.5)');
+                            svg.appendChild(waterRect);
+                        }
+                    }
+                    right--;
+                }
+            }
+        }
+
+        function drawWaterLevels(heights) {
+            const svg = document.getElementById('waterLevels');
+            svg.innerHTML = '';
+            const maxHeight = Math.max(...heights);
+            const width = 800;
+            const height = 200;
+            const blockWidth = width / heights.length;
+            const unitSize = height / (maxHeight + 1);
+
+            // Draw grid
+            for (let i = 0; i <= maxHeight; i++) {
+                for (let j = 0; j < heights.length; j++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', j * blockWidth);
+                    rect.setAttribute('y', height - (i + 1) * unitSize);
+                    rect.setAttribute('width', blockWidth);
+                    rect.setAttribute('height', unitSize);
+                    rect.setAttribute('fill', 'none');
+                    rect.setAttribute('stroke', '#333');
+                    svg.appendChild(rect);
+                }
+            }
+
+            let left = 0;
+            let right = heights.length - 1;
+            let leftMax = 0;
+            let rightMax = 0;
+
+            while (left < right) {
+                if (heights[left] < heights[right]) {
+                    if (heights[left] >= leftMax) {
+                        leftMax = heights[left];
+                    } else {
+                        for (let j = heights[left]; j < leftMax; j++) {
+                            const waterRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            waterRect.setAttribute('x', left * blockWidth);
+                            waterRect.setAttribute('y', height - (j + 1) * unitSize);
+                            waterRect.setAttribute('width', blockWidth);
+                            waterRect.setAttribute('height', unitSize);
+                            waterRect.setAttribute('fill', 'rgba(56, 189, 248, 0.5)');
+                            svg.appendChild(waterRect);
+                        }
+                    }
+                    left++;
+                } else {
+                    if (heights[right] >= rightMax) {
+                        rightMax = heights[right];
+                    } else {
+                        for (let j = heights[right]; j < rightMax; j++) {
+                            const waterRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            waterRect.setAttribute('x', right * blockWidth);
+                            waterRect.setAttribute('y', height - (j + 1) * unitSize);
+                            waterRect.setAttribute('width', blockWidth);
+                            waterRect.setAttribute('height', unitSize);
+                            waterRect.setAttribute('fill', 'rgba(56, 189, 248, 0.5)');
+                            svg.appendChild(waterRect);
+                        }
+                    }
+                    right--;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
